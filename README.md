@@ -40,15 +40,17 @@ Assuming Turbomole is correctly installed in the machine to be used:
 
    Also add the keyword "point charges" in the section $drvopt
 
-4. Edit the script fakeorca.sh to carry out the calculation you need (if unmodified, it runs dscf and grad, you will need to change dscf for ridft if you wish to run DFT calculations with RI).
+4. Edit the script fakeorca.sh to carry out the calculation you need (if unmodified, it runs dscf and grad, you will need to change dscf for ridft if you wish to run calculations with RI).
 
 5. Rename the control file to control-template
 
 6. Make sure the script OrcaTranslator.py is in the path
 
-7. Prepare the pDynamo QMMM calculation set the command for orca to call the script fakeorca.sh
+7. Set the PDYNAMO_SCRATCH shell variable to your scratch directory (it is not enough to set it in the pDynamo script).
 
-8. Run the calculation normally.
+8. Prepare the pDynamo QMMM calculation set the command for orca to call the script fakeorca.sh
+
+9. Run the calculation normally.
 
 **
 
