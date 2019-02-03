@@ -9,7 +9,6 @@ grad > grad.out
 
 /wrk/QMMM/OrcaTranslator.py $BASENAME.engrad $BASENAME.pcgrad -T2O
 
-rm gradient #otherwise it will accumulate results from previous runs
 
 cd $CURRENT
 
