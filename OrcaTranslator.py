@@ -113,9 +113,6 @@ class OrcaRW:
         print "FINAL SINGLE POINT ENERGY    ", self.energy #maybe more format is needed. The point of this is to make the output look like an orca output.
         print "                                     ****ORCA TERMINATED NORMALLY****    "
 
-
-
-
 class TurbomoleRW():
     def __init__(self):
         self.charges=[]
@@ -133,7 +130,13 @@ class TurbomoleRW():
         self.charges=d[2]
         self.gradients=d[3]
         self.chargegradients=d[4]
-
+    def readtmenergy(): #No need to call this, energies are read from the gradients file by readtmgrads.
+        en=open("energy","r")
+        en.readline() #useless header
+        line=en.readline().split()
+        self.energy=float(line[1])
+        en.close()
+        os.system("rm energy")
     def writetmcoords(self):
         tmcoords=open("coord","w")
         tmcoords.write("$coord\n")
@@ -166,6 +169,7 @@ class TurbomoleRW():
             self.gradients.append(float(fields[1].replace("D","E")))
             self.gradients.append(float(fields[2].replace("D","E")))
         tmgrad.close()
+        os.system("rm gradient") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
     def readtmchargegrads(self):
         control=open("control","r")
         readint=False
@@ -181,6 +185,71 @@ class TurbomoleRW():
 
 
 
+class xtbRW(TurbomoleRW):
+    def writextbcoords(self):
+        xtbcoords=open("coords.xyz","w")
+        xtbcoords.write(str(len(self.coords))+"\n\n")
+        for i in self.coords:
+            xtbcoords.write("{3:2s} {0:20.14f} {1:20.14f} {2:20.14f}\n".format(i[1],i[2],i[3],i[0]))
+        xtbcoords.close()
+    def writextbcharges(self):
+        target=open("pcharge","w")
+        target.write(str(len(self.charges))+"\n")
+        for j in self.charges:
+         #   target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3],j[0]))
+            target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #I have NO idea if the coordinates are meant to be in A or Bohr. This is a wild guess.
+        target.close()
+    def writexcontrol(self): #for now this do anything. It's best that the use builds their own xcontrol, or just uses the defaults.
+        xcont=open("xcontrol","w")
+        xcont.close()
+    def readxtbgrads(self):
+        os.system("rm xtbrestart") #This file can cause a lot of trouble
+        tmgrad=open("gradient","r")
+        tmgrad.readline()   # Don't need first line.    
+        en=tmgrad.readline()[32:53]
+        energy=en.lstrip("=")
+        if "***" in energy:
+            print en
+            raise ValueError
+        else:
+            self.energy=float(energy)
+        for i in tmgrad:
+            if "$end" in i:
+                break
+            fields=i.split()
+            #In tubomole you have first the coordinates, which
+            #has 4 fields so we easily skip them.
+            if len(fields)!=3: 
+                continue
+            self.gradients.append(float(fields[0].split("D")[0]))
+            self.gradients.append(float(fields[1].split("D")[0]))
+            self.gradients.append(float(fields[2].split("D")[0]))
+
+        tmgrad.close()
+        os.system("rm gradient") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
+    def readxtbchargegrads(self):
+        control=open("pcgrad","r")
+        readint=False
+        for i in control:
+            grad=[0,0,0]
+            gi=[[0,12],[12,24],[24,-1]]
+            for j,v in enumerate(grad):
+                #I have _NO_ idea of why some gradients are replaced with *******. I just take them to be zero. Of course this is something worth asking the Grimme group.
+                try:
+                    grad[j]=float(i[gi[j][0]:gi[j][1]])
+                except ValueError:
+                    grad[j]=0.0
+            self.chargegradients.append(grad)
+        control.close()
+        os.system("rm pcgrad")
+    def readxtbenergy(self):
+        self.readtmenergy()
+
+
+
+
+#TODO: Make the following part more modeular so less code is repeated.
+
 
 if "-O2T" in sys.argv:
     fromOrca=OrcaRW()
@@ -192,7 +261,7 @@ if "-O2T" in sys.argv:
     toTM.writetmcharges()
 elif "-T2O" in sys.argv:
     fromTM=TurbomoleRW()
-    fromTM.readtmgrads()
+    fromTM.readtmgrads() #also reads the energy
     fromTM.readtmchargegrads()
     toOrca=OrcaRW()
     toOrca.getdata(fromTM.givedata())
@@ -200,5 +269,21 @@ elif "-T2O" in sys.argv:
     toOrca.writeorcachargegrads(sys.argv[2])
     toOrca.writeorcaoutput()
 
-
-
+elif "-O2X" in sys.argv:
+    fromOrca=OrcaRW()
+    fromOrca.readorcacoords(sys.argv[1])
+    fromOrca.readorcacharges(sys.argv[2])
+    toX=xtbRW()
+    toX.getdata(fromOrca.givedata())
+    toX.writextbcoords()
+    toX.writextbcharges()
+elif "-X2O" in sys.argv:
+    fromX=xtbRW()
+    fromX.readxtbgrads()
+    fromX.readxtbchargegrads()
+    toOrca=OrcaRW()
+    toOrca.getdata(fromX.givedata())
+    toOrca.writeorcagradients(sys.argv[1])
+    toOrca.writeorcachargegrads(sys.argv[2])
+    toOrca.writeorcaoutput()
+    os.system("rm energy") # just in case
