@@ -52,9 +52,25 @@ Assuming Turbomole is correctly installed in the machine to be used:
 
 9. Run the calculation normally.
 
+## How to run a pDynamo/XTB calculation
+
+Assuming that xtb 6.0 is correctly installed.
+
+1. Prepare the pDynamo calculation normally.
+
+2. If you want, prepare an xcontrol file for xtb and place it in PDYNAMO_SCRATCH
+
+3. Copy to your work directory and edit the provided fakeorca_xtb.sh. Set the correct charge/multiplicity for your systems and, optionally, the number of cores to be used.
+
+4. Prepare the pDynamo QMMM calculation set the command for orca to call the script fakeorca_xtb.sh
+
+5. Run the calculation normally.
+
+Note that the electrostatic embedding used by pDynamo may not be fully tested in XTB 6.0. Please refer to the program's documentation and the developer's webpage.
+
 **
 
-The developers of pDQMT are in no way involved with the pDynamo, Orca or Turbomole development.
+The developers of pDQMT are in no way involved with the pDynamo, Orca, Turbomole or XTB development.
 Please comply with the license of every program you use, and cite the appropiate references.
 
 pDQMT has only been minimally tested. Since it is fairly small, the authors find likely

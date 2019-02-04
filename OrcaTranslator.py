@@ -187,6 +187,7 @@ class TurbomoleRW():
 
 class xtbRW(TurbomoleRW):
     def writextbcoords(self):
+        os.system("rm xtbrestart") #This file can cause a lot of trouble
         xtbcoords=open("coords.xyz","w")
         xtbcoords.write(str(len(self.coords))+"\n\n")
         for i in self.coords:
@@ -196,8 +197,7 @@ class xtbRW(TurbomoleRW):
         target=open("pcharge","w")
         target.write(str(len(self.charges))+"\n")
         for j in self.charges:
-         #   target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3],j[0]))
-            target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #I have NO idea if the coordinates are meant to be in A or Bohr. This is a wild guess.
+            target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #Prof. Grimme has confirmed that these should indeed be Bohrs.
         target.close()
     def writexcontrol(self): #for now this do anything. It's best that the use builds their own xcontrol, or just uses the defaults.
         xcont=open("xcontrol","w")
@@ -234,11 +234,10 @@ class xtbRW(TurbomoleRW):
             grad=[0,0,0]
             gi=[[0,12],[12,24],[24,-1]]
             for j,v in enumerate(grad):
-                #I have _NO_ idea of why some gradients are replaced with *******. I just take them to be zero. Of course this is something worth asking the Grimme group.
-                try:
-                    grad[j]=float(i[gi[j][0]:gi[j][1]])
-                except ValueError:
-                    grad[j]=0.0
+                #try:
+                grad[j]=float(i[gi[j][0]:gi[j][1]])
+                #except ValueError:
+                #    grad[j]=0.0
             self.chargegradients.append(grad)
         control.close()
         os.system("rm pcgrad")
