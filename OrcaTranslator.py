@@ -213,7 +213,7 @@ class xtbRW(TurbomoleRW):
             xtbcoords.write("{3:2s} {0:20.14f} {1:20.14f} {2:20.14f}\n".format(i[1],i[2],i[3],i[0]))
         xtbcoords.close()
     def writextbcharges(self):
-        if len(charges)==0: #Just a regular QM calculation, no charges.
+        if len(self.charges)==0: #Just a regular QM calculation, no charges.
             return 
         target=open("pcharge","w")
         target.write(str(len(self.charges))+"\n")
@@ -223,7 +223,7 @@ class xtbRW(TurbomoleRW):
         for j in self.charges:
             target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #Prof. Grimme has confirmed that these should indeed be Bohrs.
             if "--debug" in sys.argv:
-            debug.write("Li  {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3])) # debug only
+                debug.write("Li  {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3])) # debug only
         target.close()
         debug.close()
     def writexcontrol(self): #for now this do anything. It's best that the use builds their own xcontrol, or just uses the defaults.

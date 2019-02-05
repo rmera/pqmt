@@ -21,7 +21,7 @@ To the long life of the Ven. Khenpo Phuntsok Tenzin Rinpoche.
 
 pDynamo is a Python library for MM, QM and especially QMMM calculations, available at https://sites.google.com/site/pdynamomodeling/
 
-pDynamo allows the use of the ORCA program for QM calculations. In some cases, the use of a different QM program may be desirable. This Python script translates the relevant input and ouput files between ORCA and other programs (as of now, only Turbomole supported), so different QM programs can be employed.
+pDynamo allows the use of the ORCA program for QM calculations. In some cases, the use of a different QM program may be desirable. This Python script translates the relevant input and ouput files between ORCA and other programs (as of now, Turbomole and XTB are supported), so different QM programs can be employed.
 
 The pDQMT scripts works assuming that the time used to translate inputs and outputs is minimal compared to the lenght of the QM calculation.
 
