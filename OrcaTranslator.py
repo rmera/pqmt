@@ -79,7 +79,10 @@ class OrcaRW:
                 self.coords.append([fields[0],float(fields[1]),float(fields[2]),float(fields[3])])
         orca.close()
     def readorcacharges(self,chargesname):
-        charges=open(chargesname,"r")
+        try:
+            charges=open(chargesname,"r")
+        except IOError: #there are no charges to read, it is just a QM calculation
+            return
         charges.readline()
         for i in charges:
             if i == "\n":
@@ -169,7 +172,7 @@ class TurbomoleRW():
             self.gradients.append(float(fields[1].replace("D","E")))
             self.gradients.append(float(fields[2].replace("D","E")))
         tmgrad.close()
-        os.system("rm gradient") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
+        os.system("mv gradient gradient-old") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
     def readtmchargegrads(self):
         control=open("control","r")
         readint=False
@@ -186,6 +189,22 @@ class TurbomoleRW():
 
 
 class xtbRW(TurbomoleRW):
+    def __init__(self):
+        self.charges=[]
+        self.energy=0
+        self.chargegradients=[]
+        self.coords=[] #list of lists with an atomic number and coordinates, in Bohrs, for each thing.
+        self.gradients=[] #Gradient is just a big list, close to orca format.
+        pass
+
+    def givedata(self):
+        return self.energy,self.coords,self.charges,self.gradients,self.chargegradients
+    def getdata(self,d):
+        self.energy=d[0]
+        self.coords=d[1]
+        self.charges=d[2]
+        self.gradients=d[3]
+        self.chargegradients=d[4]
     def writextbcoords(self):
         os.system("rm xtbrestart") #This file can cause a lot of trouble
         xtbcoords=open("coords.xyz","w")
@@ -194,12 +213,21 @@ class xtbRW(TurbomoleRW):
             xtbcoords.write("{3:2s} {0:20.14f} {1:20.14f} {2:20.14f}\n".format(i[1],i[2],i[3],i[0]))
         xtbcoords.close()
     def writextbcharges(self):
+        if len(charges)==0: #Just a regular QM calculation, no charges.
+            return 
         target=open("pcharge","w")
         target.write(str(len(self.charges))+"\n")
+        if "--debug" in sys.argv:
+            debug=open("debug_pcharges.xyz","w") # debug only
+            debug.write(str(len(self.charges))+"\n\n") # debug only
         for j in self.charges:
             target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #Prof. Grimme has confirmed that these should indeed be Bohrs.
+            if "--debug" in sys.argv:
+            debug.write("Li  {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3])) # debug only
         target.close()
+        debug.close()
     def writexcontrol(self): #for now this do anything. It's best that the use builds their own xcontrol, or just uses the defaults.
+        return
         xcont=open("xcontrol","w")
         xcont.close()
     def readxtbgrads(self):
@@ -221,14 +249,17 @@ class xtbRW(TurbomoleRW):
             #has 4 fields so we easily skip them.
             if len(fields)!=3: 
                 continue
-            self.gradients.append(float(fields[0].split("D")[0]))
-            self.gradients.append(float(fields[1].split("D")[0]))
-            self.gradients.append(float(fields[2].split("D")[0]))
+            self.gradients.append(float(fields[0].replace("D","E")))
+            self.gradients.append(float(fields[1].replace("D","E")))
+            self.gradients.append(float(fields[2].replace("D","E")))
 
         tmgrad.close()
-        os.system("rm gradient") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
+        os.system("mv gradient gradient-old") #Ensures that we always read the first set of gradients. POSIX only, and quite dirty. Sorry, I'm tired.
     def readxtbchargegrads(self):
-        control=open("pcgrad","r")
+        try:
+            control=open("pcgrad","r")
+        except IOError:
+            return #I just assume there weren't charges there to begin with.
         readint=False
         for i in control:
             grad=[0,0,0]
