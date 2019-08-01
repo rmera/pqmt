@@ -225,7 +225,8 @@ class xtbRW(TurbomoleRW):
             if "--debug" in sys.argv:
                 debug.write("Li  {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3])) # debug only
         target.close()
-        debug.close()
+        if "--debug" in sys.argv:
+            debug.close()
     def writexcontrol(self): #for now this do anything. It's best that the use builds their own xcontrol, or just uses the defaults.
         return
         xcont=open("xcontrol","w")
