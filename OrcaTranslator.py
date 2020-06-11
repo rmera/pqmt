@@ -308,7 +308,7 @@ elif "-O2X" in sys.argv:
     toX=xtbRW()
     toX.getdata(fromOrca.givedata())
     toX.writextbcoords()
-    os.system("cp "+sys.argv[2]+" "+sys.argv[2].replace(".pc","-orcamade.pc"))
+#    os.system("cp "+sys.argv[2]+" "+sys.argv[2].replace(".pc","-orcamade.pc"))
     if "-99" in sys.argv:
         toX.writextbcharges(sys.argv[2],"99")
     else:
