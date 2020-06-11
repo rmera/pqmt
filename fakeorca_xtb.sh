@@ -7,7 +7,7 @@ CURRENT=$(pwd)
 
 cd $PDYNAMO_SCRATCH
 
-$PDQMT/OrcaTranslator.py $BASENAME.inp $BASENAME.pc -O2X
+$PDQMT/OrcaTranslator.py $BASENAME.inp $BASENAME.pc -O2X -99
 
 xtb coords.xyz --grad -c 0 -I xtb.input  -P $OMP_NUM_THREADS  > out.dat
 
