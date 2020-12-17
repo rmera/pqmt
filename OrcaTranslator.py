@@ -25,6 +25,7 @@
 
 #To the long life of the Ven. Khenpo Phuntsok Tenzin Rinpoche.
 
+from __future__ import print_function
 
 
 
@@ -111,10 +112,10 @@ class OrcaRW:
             outgrads.write(" {0:16.12f} {1:16.12f} {2:16.12f}\n".format(i[0],i[1],i[2]))
         outgrads.close()    
     def writeorcaoutput(self): #writes parts of an  Orca output to stdin. Hopefully enough so it seems that Orca actually ran.
-        print "               *           SCF CONVERGED AFTER  23 CYCLES          *"
-        print "Total Dipole Moment    :     -1.05903      -6.48762       9.33188" #This should  not be needed for optimization, so let's just put anything.
-        print "FINAL SINGLE POINT ENERGY    ", self.energy #maybe more format is needed. The point of this is to make the output look like an orca output.
-        print "                                     ****ORCA TERMINATED NORMALLY****    "
+        print( "               *           SCF CONVERGED AFTER  23 CYCLES          *")
+        print( "Total Dipole Moment    :     -1.05903      -6.48762       9.33188") #This should  not be needed for optimization, so let's just put anything.
+        print( "FINAL SINGLE POINT ENERGY    ", self.energy) #maybe more format is needed. The point of this is to make the output look like an orca output.
+        print( "                                     ****ORCA TERMINATED NORMALLY****    ")
 
 class TurbomoleRW():
     def __init__(self):
@@ -212,16 +213,17 @@ class xtbRW(TurbomoleRW):
         for i in self.coords:
             xtbcoords.write("{3:2s} {0:20.14f} {1:20.14f} {2:20.14f}\n".format(i[1],i[2],i[3],i[0]))
         xtbcoords.close()
-    def writextbcharges(self):
+    def writextbcharges(self,name,col5):
         if len(self.charges)==0: #Just a regular QM calculation, no charges.
             return 
-        target=open("pcharge","w")
+        target=open(name,"w")
         target.write(str(len(self.charges))+"\n")
         if "--debug" in sys.argv:
             debug=open("debug_pcharges.xyz","w") # debug only
             debug.write(str(len(self.charges))+"\n\n") # debug only
         for j in self.charges:
-            target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f}\n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #Prof. Grimme has confirmed that these should indeed be Bohrs.
+            target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f} {4:s} \n".format(j[1],j[2],j[3],j[0],col5)) # interface=orca must be used in the xtb input file
+         #   target.write("{3:8.5f} {0:8.5f} {1:8.5f} {2:8.5f} 99 \n".format(a2b(j[1]),a2b(j[2]),a2b(j[3]),j[0])) #Prof. Grimme has confirmed that these should indeed be Bohrs.
             if "--debug" in sys.argv:
                 debug.write("Li  {0:8.5f} {1:8.5f} {2:8.5f}\n".format(j[1],j[2],j[3])) # debug only
         target.close()
@@ -238,7 +240,7 @@ class xtbRW(TurbomoleRW):
         en=tmgrad.readline()[32:53]
         energy=en.lstrip("=")
         if "***" in energy:
-            print en
+            print(en)
             raise ValueError
         else:
             self.energy=float(energy)
@@ -307,14 +309,20 @@ elif "-O2X" in sys.argv:
     toX=xtbRW()
     toX.getdata(fromOrca.givedata())
     toX.writextbcoords()
-    toX.writextbcharges()
+#    os.system("cp "+sys.argv[2]+" "+sys.argv[2].replace(".pc","-orcamade.pc"))
+    if "-99" in sys.argv:
+        toX.writextbcharges(sys.argv[2],"99")
+    else:
+        toX.writextbcharges(sys.argv[2],"")
 elif "-X2O" in sys.argv:
     fromX=xtbRW()
-    fromX.readxtbgrads()
+    #fromX.readxtbgrads()
+    os.rename(".engrad",sys.argv[1])
     fromX.readxtbchargegrads()
     toOrca=OrcaRW()
     toOrca.getdata(fromX.givedata())
-    toOrca.writeorcagradients(sys.argv[1])
+    
+    #toOrca.writeorcagradients(sys.argv[1])
     toOrca.writeorcachargegrads(sys.argv[2])
     toOrca.writeorcaoutput()
     os.system("rm energy") # just in case
