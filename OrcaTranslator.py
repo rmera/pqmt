@@ -25,6 +25,7 @@
 
 #To the long life of the Ven. Khenpo Phuntsok Tenzin Rinpoche.
 
+from __future__ import print_function
 
 
 
@@ -111,10 +112,10 @@ class OrcaRW:
             outgrads.write(" {0:16.12f} {1:16.12f} {2:16.12f}\n".format(i[0],i[1],i[2]))
         outgrads.close()    
     def writeorcaoutput(self): #writes parts of an  Orca output to stdin. Hopefully enough so it seems that Orca actually ran.
-        print "               *           SCF CONVERGED AFTER  23 CYCLES          *"
-        print "Total Dipole Moment    :     -1.05903      -6.48762       9.33188" #This should  not be needed for optimization, so let's just put anything.
-        print "FINAL SINGLE POINT ENERGY    ", self.energy #maybe more format is needed. The point of this is to make the output look like an orca output.
-        print "                                     ****ORCA TERMINATED NORMALLY****    "
+        print( "               *           SCF CONVERGED AFTER  23 CYCLES          *")
+        print( "Total Dipole Moment    :     -1.05903      -6.48762       9.33188") #This should  not be needed for optimization, so let's just put anything.
+        print( "FINAL SINGLE POINT ENERGY    ", self.energy) #maybe more format is needed. The point of this is to make the output look like an orca output.
+        print( "                                     ****ORCA TERMINATED NORMALLY****    ")
 
 class TurbomoleRW():
     def __init__(self):
@@ -239,7 +240,7 @@ class xtbRW(TurbomoleRW):
         en=tmgrad.readline()[32:53]
         energy=en.lstrip("=")
         if "***" in energy:
-            print en
+            print(en)
             raise ValueError
         else:
             self.energy=float(energy)
