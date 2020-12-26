@@ -276,12 +276,23 @@ class xtbRW(TurbomoleRW):
         control.close()
         os.system("rm pcgrad")
     def readxtbenergy(self):
-        self.readtmenergy()
-
+        if self.energy!=0:  
+            return
+        #This is just in case we haven't read the energy from the gradient file. 
+        fout=open("out.dat","r")
+        close=False
+        for i in fout:
+            if "-----------------------------------------" in i:
+                close=True
+            if close and ("TOTAL ENERGY" in i):
+                self.energy=float(i.split()[-3])
+                fout.close()
+                return
 
 
 
 #TODO: Make the following part more modeular so less code is repeated.
+
 
 
 if "-O2T" in sys.argv:
@@ -294,12 +305,16 @@ if "-O2T" in sys.argv:
     toTM.writetmcharges()
 elif "-T2O" in sys.argv:
     fromTM=TurbomoleRW()
-    fromTM.readtmgrads() #also reads the energy
-    fromTM.readtmchargegrads()
+    if not "-SP" in sys.argv:
+        fromTM.readtmgrads() #also reads the energy
+        fromTM.readtmchargegrads()
+    else:
+        fromTM.readtmenergy()
     toOrca=OrcaRW()
     toOrca.getdata(fromTM.givedata())
-    toOrca.writeorcagradients(sys.argv[1])
-    toOrca.writeorcachargegrads(sys.argv[2])
+    if not "-SP" in sys.argv:
+        toOrca.writeorcagradients(sys.argv[1])
+        toOrca.writeorcachargegrads(sys.argv[2])
     toOrca.writeorcaoutput()
 
 elif "-O2X" in sys.argv:
@@ -316,7 +331,7 @@ elif "-O2X" in sys.argv:
         toX.writextbcharges(sys.argv[2],"")
 elif "-X2O" in sys.argv:
     fromX=xtbRW()
-    #fromX.readxtbgrads()
+    fromX.readxtbgrads()
     os.rename(".engrad",sys.argv[1])
     fromX.readxtbchargegrads()
     toOrca=OrcaRW()
