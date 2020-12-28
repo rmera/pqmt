@@ -21,10 +21,11 @@ To the long life of the Ven. Khenpo Phuntsok Tenzin Rinpoche.
 
 pDynamo is a Python library for MM, QM and especially QMMM calculations, available at https://sites.google.com/site/pdynamomodeling/
 
-pDynamo allows the use of the ORCA program for QM calculations. In some cases, the use of a different QM program may be desirable. This Python script translates the relevant input and ouput files between ORCA and other programs (as of now, Turbomole and XTB are supported), so different QM programs can be employed.
+pDynamo allows the use of the ORCA program for QM calculations. In some cases, the use of a different QM program may be desirable. This Python script translates the relevant input and ouput files between ORCA and other programs (as of now, Turbomole and xtb are supported), so different QM programs can be employed.
 
 The pDQMT scripts works assuming that the time used to translate inputs and outputs is minimal compared to the lenght of the QM calculation.
 
+Of course, any program that writes/reads Orca files can be used with pDQMT for interaction with Turbomole and xtb.
 
 ## How to run a pDynamo/Turbomole calculation.
 
@@ -40,40 +41,41 @@ Assuming Turbomole is correctly installed in the machine to be used:
 
    Also add the keyword "point charges" in the section $drvopt
 
-4. Edit the script fakeorca.sh to carry out the calculation you need (if unmodified, it runs dscf and grad, you will need to change dscf for ridft if you wish to run calculations with RI).
+4. Copy the provided fakeorca.sh file to your work directory, and edit it to carry out the calculation you need (if unmodified, it runs dscf and grad, you will need to change dscf for ridft if you wish to run calculations with RI). 
 
-5. Rename the control file to control-template
+5. If you want single-point calculations, add the -SP flag to the calls to OrcaTranslator.py in the fake_orca.sh script, and comment out the grad calculation.
 
-6. Make sure the script OrcaTranslator.py is in the path
+6. Rename the control file to control-template
 
-7. Set the PDYNAMO_SCRATCH shell variable to your scratch directory (it is not enough to set it in the pDynamo script).
+7. Make sure the script OrcaTranslator.py is in the path
 
-8. Prepare the pDynamo QMMM calculation set the command for orca to call the script fakeorca.sh
+8. Set the PDYNAMO_SCRATCH shell variable to your scratch directory (it is not enough to set it in the pDynamo script). I'd advice to use the same working directory as scratch.
 
-9. Run the calculation normally.
+9. Prepare the pDynamo QMMM calculation and set the command for orca to call the script fakeorca.sh
+
+10. Run the calculation normally.
 
 ## How to run a pDynamo/XTB calculation
 
-Assuming that xtb 6.0 is correctly installed.
+Assuming that xtb 6.3 is correctly installed.
 
 1. Prepare the pDynamo calculation normally.
 
-2. If you want, prepare an xcontrol file for xtb and place it in PDYNAMO_SCRATCH
+2. Copy the provided xtb.inp file to your working directory. Edit it if you want to add something.
 
-3. Copy to your work directory and edit the provided fakeorca_xtb.sh. Set the correct charge/multiplicity for your systems and, optionally, the number of cores to be used.
+3. Copy the provided fake_orca.sh to your work directory and edit it. Set the correct charge/multiplicity for your systems and, optionally, the number of cores to be used. 
 
-4. Prepare the pDynamo QMMM calculation set the command for orca to call the script fakeorca_xtb.sh
+4. Prepare the pDynamo QMMM calculation and set the command for orca to call the script fakeorca_xtb.sh
 
 5. Run the calculation normally.
 
-Note that the electrostatic embedding used by pDynamo may not be fully tested in XTB 6.0. Please refer to the program's documentation and the developer's webpage.
 
 **
 
-The developers of pDQMT are in no way involved with the pDynamo, Orca, Turbomole or XTB development.
+The developer of pDQMT is in no way involved with the pDynamo, Orca, Turbomole or xtb development.
 Please comply with the license of every program you use, and cite the appropiate references.
 
-pDQMT has only been minimally tested. Since it is fairly small, the authors find likely
+pDQMT has not been thoroughly tested. Since it is fairly small, the author finds likely
 that it will perform similarly in every case. Still, use it at your own risk.
 
 

@@ -134,7 +134,7 @@ class TurbomoleRW():
         self.charges=d[2]
         self.gradients=d[3]
         self.chargegradients=d[4]
-    def readtmenergy(): #No need to call this, energies are read from the gradients file by readtmgrads.
+    def readtmenergy(self): #No need to call this, energies are read from the gradients file by readtmgrads.
         en=open("energy","r")
         en.readline() #useless header
         line=en.readline().split()
