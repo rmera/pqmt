@@ -332,7 +332,10 @@ elif "-O2X" in sys.argv:
 elif "-X2O" in sys.argv:
     fromX=xtbRW()
     fromX.readxtbgrads()
-    os.rename(".engrad",sys.argv[1])
+    try:
+        os.rename(".engrad",sys.argv[1])
+    except:
+        os.rename("coords.engrad",sys.argv[1]) #new versions of xtb
     fromX.readxtbchargegrads()
     toOrca=OrcaRW()
     toOrca.getdata(fromX.givedata())
